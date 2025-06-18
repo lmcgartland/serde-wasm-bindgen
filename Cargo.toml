@@ -13,7 +13,7 @@ keywords = ["serde", "serialization", "javascript", "wasm", "webassembly"]
 [dependencies]
 serde = { version = "1.0.193", features = ["derive"] }
 js-sys = "^0.3"
-wasm-bindgen = "0.2.83"
+wasm-bindgen = { version = "0.2", features = ["enable-interning"] }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.24"
