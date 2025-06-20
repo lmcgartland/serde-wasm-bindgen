@@ -57,6 +57,24 @@ fn static_str_to_js(s: &'static str) -> JsString {
     })
 }
 
+fn dynamic_str_to_js(s: &str) -> JsString {
+    use std::cell::RefCell;
+    use std::collections::HashMap;
+
+    thread_local! {
+        // Cache for dynamic strings based on their content
+        static DYNAMIC_CACHE: RefCell<HashMap<String, JsString>> = Default::default();
+    }
+    
+    DYNAMIC_CACHE.with(|cache| {
+        cache
+            .borrow_mut()
+            .entry(s.to_string())
+            .or_insert_with(|| s.into())
+            .clone()
+    })
+}
+
 /// Custom bindings to avoid using fallible `Reflect` for plain objects.
 #[wasm_bindgen]
 extern "C" {

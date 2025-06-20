@@ -5,7 +5,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
 use crate::preserve::PRESERVED_VALUE_MAGIC;
-use crate::{static_str_to_js, Error, ObjectExt};
+use crate::{static_str_to_js, dynamic_str_to_js, Error, ObjectExt};
 
 type Result<T = JsValue> = super::Result<T>;
 
@@ -321,15 +321,13 @@ impl<'s> ser::Serializer for &'s Serializer {
 
     /// Serializes `&str` into a JS string, using interning for better performance.
     ///
-    /// This uses wasm-bindgen's string interning feature to cache frequently used
+    /// This uses our own string interning feature to cache frequently used
     /// dynamic strings, which can provide significant performance improvements
-    /// (up to 783% faster) when the same strings are serialized multiple times.
+    /// when the same strings are serialized multiple times.
     /// Only affects dynamic strings from serde - static strings continue to use
     /// the existing optimized `static_str_to_js` function.
     fn serialize_str(self, v: &str) -> Result {
-        let interned = wasm_bindgen::intern(v);
-        let interned = JsString::from(interned);
-        Ok(interned.into())
+        Ok(dynamic_str_to_js(v).into())
     }
 
 
