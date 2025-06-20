@@ -67,11 +67,17 @@ fn dynamic_str_to_js(s: &str) -> JsString {
     }
     
     DYNAMIC_CACHE.with(|cache| {
-        cache
-            .borrow_mut()
-            .entry(s.to_string())
-            .or_insert_with(|| s.into())
-            .clone()
+        let mut cache = cache.borrow_mut();
+        
+        // Check if the key exists without allocating - zero-copy lookup
+        if let Some(cached) = cache.get(s) {
+            return cached.clone();
+        }
+        
+        // Only allocate when we need to insert a new entry
+        let js_string: JsString = s.into();
+        cache.insert(s.to_string(), js_string.clone());
+        js_string
     })
 }
 
