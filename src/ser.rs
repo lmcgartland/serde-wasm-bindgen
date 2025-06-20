@@ -327,8 +327,11 @@ impl<'s> ser::Serializer for &'s Serializer {
     /// Only affects dynamic strings from serde - static strings continue to use
     /// the existing optimized `static_str_to_js` function.
     fn serialize_str(self, v: &str) -> Result {
-        Ok(wasm_bindgen::intern(v).into())
+        let interned = wasm_bindgen::intern(v);
+        let interned = JsString::from(interned);
+        Ok(interned.into())
     }
+
 
     /// Serializes `i64` into a `BigInt` or a JS number.
     ///
